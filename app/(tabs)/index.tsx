@@ -1,74 +1,107 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import { useEffect, useState } from "react";
+import { FlatList, StyleSheet, Text, View } from "react-native";
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { Media, useTrending } from "@/hooks/useTrending";
+import MediaCard from "@/components/MediaCard";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+const HomeTab = createMaterialTopTabNavigator();
 
-export default function HomeScreen() {
+export default function Index() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <HomeTab.Navigator>
+        <HomeTab.Screen name="Trending" component={TrendingScreen} options={{ title: 'Trending' }} />
+        <HomeTab.Screen name="Popular" component={PopularScreen} options={{ title: "What's Popular" }} />
+    </HomeTab.Navigator>
+  );
+}
+
+function TrendingScreen() {
+  const [trending, setTrending] = useState<Media[]>([]);
+  useEffect(() => {
+    useTrending()
+      .then(medias => setTrending(medias))
+      .catch(error => console.error)
+    ;
+
+  }, [])
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <FlatList
+        data={trending}
+        renderItem={({item}) => <MediaCard media={item} />}
+        keyExtractor={item => 'movie-'+item.id}
+      />
+    </SafeAreaView>
+  );
+}
+
+/*
+<View style={{flex: 1}}>
+  <ParallaxScrollView 
+    headerBackgroundColor={{dark: '#1b1b1d', light: '#fff'}}
+    headerImage={<Image source={{uri: movies[0]?.image_uri ?? ''}} style={[styles.headerImage]} />}
+  >
+    <View style={[styles.container]}>
+      
+    </View>
+  </ParallaxScrollView>
+</View>
+*/
+
+function PopularScreen() {
+  return (
+    <View
+      style={{
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <Text>What's popular</Text>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  list: {
+    flex: 1,
+    columnGap: 8
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  container: {
+    flex: 1
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  headerImage: {
+    flex: 1,
   },
+  bold: {
+    fontWeight: 'bold'
+  },
+  h1: {
+    fontSize: 32,
+  },
+  h2: {
+    fontSize: 24,
+  },
+  h3: {
+    fontSize: 16,
+  },
+  bgPrimary: {
+    backgroundColor: '#20232a'
+  },
+  bgSecondary: {
+    backgroundColor: "#1b1b1d"
+  },
+  textPrimary: {
+    color: '#20232a'
+  },
+  textSecondary: {
+    color: "#1b1b1d"
+  },
+  button: {
+    borderRadius: 10,
+    width: 'auto',
+    paddingHorizontal: 16
+  }
 });
